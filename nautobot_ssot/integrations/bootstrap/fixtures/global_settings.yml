@@ -792,3 +792,38 @@ prefix:
     vlan: ""
     tenant: ""
     tags: []
+group:
+  - name: Admin
+  - name: foo
+  - name: bar
+  - name: baz
+user:
+- email: admin@foobar.com
+  first_name: Admin
+  groups:
+    - Admin
+  last_name: User
+  username: admin
+  is_staff: true
+  is_superuser: true
+- email: foobarbaz@foobar.com
+  first_name: Foo
+  groups:
+    - foo
+    - bar
+    - baz
+  last_name: BarBaz
+  username: foobarbaz
+object_permission:
+  - name: "IPAM-PREFIX-FULL"
+    actions:
+      - "view"
+      - "add"
+      - "change"
+      - "delete"
+    groups:
+      - "foo"
+    object_types:
+      - "ipam | prefix"
+    constraints:
+      - tenant__tenant_group__name: FOO

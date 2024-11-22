@@ -156,3 +156,4 @@ class TestBootstrapAdapterTestCase(TransactionTestCase):
                     "location",
                 },
             )
+        print(self.bootstrap.dict()["object_permission"])

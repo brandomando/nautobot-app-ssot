@@ -107,6 +107,9 @@ MODELS_TO_SYNC = [
     "vlan",
     "vrf",
     "prefix",
+    "group",
+    "user",
+    "object_permission",
 ]
 
 

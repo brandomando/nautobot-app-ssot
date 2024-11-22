@@ -753,5 +753,44 @@
         "description": "",
         "tags": []
     }
+  ],
+  "group": [
+    {"name": "Admin"},
+    {"name": "foo"},
+    {"name": "bar"},
+    {"name": "baz"}
+  ],
+  "user": [
+    {
+      "username": "admin",
+      "first_name": "Admin",
+      "last_name": "User",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": true,
+      "email": "admin@foobar.com",
+      "groups": ["Admin"]
+    },
+    {
+      "username": "foobarbaz",
+      "first_name": "Foo",
+      "last_name": "BarBaz",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "email": "foobarbaz@foobar.com",
+      "groups": ["foo", "bar", "baz"]
+    }
+  ],
+  "object_permission": [
+    {
+      "name": "IPAM-PREFIX-FULL",
+      "actions": ["view", "add", "change", "delete"],
+      "object_types": ["ipam | prefix"],
+      "groups": ["foo"],
+      "constraints": [
+        {"tenant__tenant_group__name": "FOO"}
+      ]
+    }
   ]
 }

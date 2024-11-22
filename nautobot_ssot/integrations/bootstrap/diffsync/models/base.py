@@ -743,6 +743,80 @@ class Prefix(DiffSyncModel):
     uuid: Optional[UUID] = None
 
 
+class Group(DiffSyncModel):
+    """DiffSync model for Bootstrap Group."""
+
+    _modelname = "group"
+    _identifiers = (
+        "name",
+        "system_of_record",
+    )
+
+    name: str
+    system_of_record: str
+
+    uuid: Optional[UUID] = None
+
+
+class User(DiffSyncModel):
+    """DiffSync model for Bootstrap User."""
+
+    _modelname = "user"
+    _identifiers = (
+        "username",
+    )
+    _attributes = (
+        "first_name",
+        "last_name",
+        "is_superuser",
+        "is_staff",
+        "is_active",
+        "email",
+        "groups",
+        "system_of_record",
+    )
+
+    username: str
+    first_name: str
+    last_name: str
+    is_superuser: bool
+    is_staff: bool
+    is_active: bool
+    email: str
+    groups: List[str]
+    system_of_record: str
+
+    uuid: Optional[UUID] = None
+
+
+class ObjectPermission(DiffSyncModel):
+    """DiffSync model for Bootstrap ObjectPermission."""
+
+    _modelname = "object_permission"
+    _identifiers = (
+        "name",
+    )
+    _attributes = (
+        "actions",
+        "constraints",
+        "description",
+        "groups",
+        "object_types",
+        "system_of_record",
+    )
+    _children = {}
+
+    name: str
+    actions: List[str]
+    constraints: List[dict] = []
+    description: Optional[str] = None
+    object_types: List[str]
+    groups: List[str]
+    system_of_record: str
+
+    uuid: Optional[UUID] = None
+
+
 class SSoTJob(DiffSyncModel):
     """DiffSync model for Bootstrap SSoTJobs."""
 

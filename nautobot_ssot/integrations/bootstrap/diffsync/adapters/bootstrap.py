@@ -20,10 +20,12 @@ from nautobot_ssot.integrations.bootstrap.diffsync.models.bootstrap import (
     BootstrapDynamicGroup,
     BootstrapGitRepository,
     BootstrapGraphQLQuery,
+    BootstrapGroup,
     BootstrapLocation,
     BootstrapLocationType,
     BootstrapManufacturer,
     BootstrapNamespace,
+    BootstrapObjectPermission,
     BootstrapPlatform,
     BootstrapPrefix,
     BootstrapProvider,
@@ -36,6 +38,7 @@ from nautobot_ssot.integrations.bootstrap.diffsync.models.bootstrap import (
     BootstrapTeam,
     BootstrapTenant,
     BootstrapTenantGroup,
+    BootstrapUser,
     BootstrapVLAN,
     BootstrapVLANGroup,
     BootstrapVRF,
@@ -92,6 +95,9 @@ class LabelMixin:
             "dynamic_group",
             "computed_field",
             "graph_ql_query",
+            "group",
+            "user",
+            "object_permission",
         ]
 
         if LIFECYCLE_MGMT:
@@ -154,6 +160,9 @@ class BootstrapAdapter(Adapter, LabelMixin):
     computed_field = BootstrapComputedField
     tag = BootstrapTag
     graph_ql_query = BootstrapGraphQLQuery
+    group = BootstrapGroup
+    user = BootstrapUser
+    object_permission = BootstrapObjectPermission
 
     if LIFECYCLE_MGMT:
         software = BootstrapSoftware
@@ -187,6 +196,9 @@ class BootstrapAdapter(Adapter, LabelMixin):
         "computed_field",
         "tag",
         "graph_ql_query",
+        "group",
+        "user",
+        "object_permission",
     ]
 
     if LIFECYCLE_MGMT:
@@ -859,6 +871,56 @@ class BootstrapAdapter(Adapter, LabelMixin):
             )
             self.add(_new_software_image)
 
+    def load_group(self, group):
+        """Load Group objects from Bootstrap into DiffSync Models."""
+        if self.job.debug:
+            self.job.logger.debug(f"Loading Bootstrap Group {group}")
+        try:
+            self.get(self.group, group["name"])
+        except ObjectNotFound:
+            _new_group = self.group(
+                name=group["name"],
+                system_of_record=os.getenv("SYSTEM_OF_RECORD", "Bootstrap"),
+            )
+            self.add(_new_group)
+
+    def load_user(self, user):
+        """Load Group objects from Bootstrap into DiffSync Models."""
+        if self.job.debug:
+            self.job.logger.debug(f"Loading Bootstrap User {user}")
+        try:
+            self.get(self.group, user["username"])
+        except ObjectNotFound:
+            _new_user = self.user(
+                username=user["username"],
+                system_of_record=os.getenv("SYSTEM_OF_RECORD", "Bootstrap"),
+                first_name=user["first_name"],
+                last_name=user["last_name"],
+                is_superuser=user.get("is_superuser", False),
+                is_staff=user.get("is_staff", False),
+                is_active=user.get("is_active", True),
+                email=user["email"],
+                groups=user.get("groups", []),
+            )
+            self.add(_new_user)
+
+    def load_object_permission(self, object_permission):
+        """Load ObjectPermission objects from Bootstrap into DiffSync Models."""
+        if self.job.debug:
+            self.job.logger.debug(f"Loading Bootstrap ObjectPermission {object_permission}")
+        try:
+            self.get(self.object_permission, object_permission["name"])
+        except ObjectNotFound:
+            _new_object_permission = self.object_permission(
+                name=object_permission["name"],
+                actions=object_permission["actions"],
+                constraints=object_permission.get("constraints", []),
+                object_types=object_permission["object_types"],
+                groups=object_permission.get("groups", []),
+                system_of_record=os.getenv("SYSTEM_OF_RECORD", "Bootstrap"),
+            )
+            self.add(_new_object_permission)
+
     def load_validated_software(self, validated_software):
         """Load ValidatedSoftware objects from Bootstrap into DiffSync Models."""
         if self.job.debug:
@@ -1061,6 +1123,18 @@ class BootstrapAdapter(Adapter, LabelMixin):
             if global_settings["graph_ql_query"] is not None:  # noqa F821
                 for graph_ql_query in global_settings["graph_ql_query"]:  # noqa F821
                     self.load_graph_ql_query(query=graph_ql_query)
+        if settings.PLUGINS_CONFIG["nautobot_ssot"]["bootstrap_models_to_sync"]["group"]:
+            if global_settings["group"] is not None:
+                for group in global_settings["group"]:
+                    self.load_group(group=group)
+        if settings.PLUGINS_CONFIG["nautobot_ssot"]["bootstrap_models_to_sync"]["user"]:
+            if global_settings["user"] is not None:
+                for user in global_settings["user"]:
+                    self.load_user(user=user)
+        if settings.PLUGINS_CONFIG["nautobot_ssot"]["bootstrap_models_to_sync"]["object_permission"]:
+            if global_settings["object_permission"] is not None:
+                for object_permission in global_settings["object_permission"]:
+                    self.load_object_permission(object_permission=object_permission)
         if LIFECYCLE_MGMT:
             if settings.PLUGINS_CONFIG["nautobot_ssot"]["bootstrap_models_to_sync"]["software"]:
                 for software in global_settings["software"]:  # noqa: F821
